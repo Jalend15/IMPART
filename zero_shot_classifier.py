@@ -6,6 +6,23 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class ZeroShotClassifier:
 
+    def predict(self, model: BaseVLM, image, classes):
+        preprocess_transform = model.get_preprocess_transform()
+        image_input = preprocess_transform(image).unsqueeze(0).to(device)
+        class_texts = [f"a photo of a {c}" for c in classes]
+        
+        with torch.no_grad():
+            image_features = model.encode_image(image_input)
+            text_features = model.encode_text(class_texts)
+        image_features /= image_features.norm(dim=-1, keepdim=True)
+        text_features /= text_features.norm(dim=-1, keepdim=True)
+
+        similarity = (100.0 * image_features @ text_features.T).softmax(dim=-1)
+        values, indices = similarity[0].topk(len(classes))
+
+        for value, index in zip(values, indices):
+            print(f"{classes[index]:>16s}: {100 * value.item():.2f}%")
+
     def evaluate_testset(self, model: BaseVLM, dataset, classes):
         class_texts = [f"a photo of a {c}" for c in classes]
         with torch.no_grad():
