@@ -36,6 +36,9 @@ def display_table(result_dict):
 
     print(tabulate(table_dict, headers="keys", tablefmt="fancy_grid"))
 
+def clear_results(file_name='.cache/result.pkl'):
+    os.remove(file_name)
+
 def display_results(file_name='.cache/result.pkl'):
     try:
         with open(file_name, 'rb') as f:
