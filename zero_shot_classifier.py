@@ -7,8 +7,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 class ZeroShotClassifier:
 
     def predict(self, model: BaseVLM, image, classes):
-        preprocess_transform = model.get_preprocess_transform()
-        image_input = preprocess_transform(image).unsqueeze(0).to(device)
+        image_input = model.preprocess(image).unsqueeze(0).to(device)
         class_texts = [f"a photo of a {c}" for c in classes]
         
         with torch.no_grad():

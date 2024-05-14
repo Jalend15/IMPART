@@ -9,9 +9,6 @@ class Clip(BaseVLM):
         super().__init__(name)
         self.model, self.preprocess = clip.load('ViT-B/32', device)
     
-    def get_preprocess_transform(self):
-        return self.preprocess
-    
     def encode_image(self, image_batch):
         image_features = self.model.encode_image(image_batch)
         return image_features

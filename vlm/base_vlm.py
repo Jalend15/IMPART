@@ -1,9 +1,7 @@
 class BaseVLM:
     def __init__(self, name):
         self.name = name
-    
-    def get_preprocess_transform(self):
-        pass
+        self.preprocess = None
     
     def encode_text(self, text_batch):
         pass
