@@ -4,6 +4,7 @@ import os
 import clip
 import csv
 import Image
+import numpy as np
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -13,16 +14,17 @@ class RaClipVanilla(BaseVLM):
         super().__init__(name)
         self.model, self.preprocess = clip.load(model_name, device)
         self.dataset_path = dataset_path
-        self.reference_set = []
-        self.reference_embeddings = []
+        self.reference_set, self.reference_embeddings = self.load_reference_set()
 
     # Should load and create the reference set
-    def load_reference_set(self, dataset):
+    def load_reference_set(self):
         """Assuming reference set is a csv like data = [
                 ["images/dog1.jpg", "A black Labrador retriever playing in a park."],
                 ["images/dog2.jpg", "A small poodle sitting on a sofa."]
             ]
         """
+        reference_set = []
+        reference_embeddings = []
         with open(self.dataset_path, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
@@ -31,10 +33,11 @@ class RaClipVanilla(BaseVLM):
                 image = Image.open(image_path).convert("RGB")
                 processed_image = self.preprocess(image).unsqueeze(0).to(self.device)
                 embedding = self.model.encode_image(processed_image)
-                self.reference_set.append((image_path, description))
-                self.reference_embeddings.append(embedding.squeeze(0))  # Store the embeddings for later retrieval
+                reference_set.append((image_path, description))
+                reference_embeddings.append(embedding.squeeze(0))  # Store the embeddings for later retrieval
 
         print(f"Loaded {len(self.reference_set)} image-text pairs into the reference set.")
+        return reference_set, reference_embeddings
 
 
     # should implement retrieval from reference set and augmentation  
@@ -48,3 +51,22 @@ class RaClipVanilla(BaseVLM):
         text_inputs = torch.cat([clip.tokenize(text) for text in text_batch]).to(device)
         text_features = self.model.encode_text(text_inputs)
         return text_features
+    
+    def retrieve_similar(self, image_batch, top_k=5):
+        input_embedding = self.model.encode_image(image_batch)
+        similarities = [torch.cosine_similarity(input_embedding, ref_emb, dim=1).item() for ref_emb in self.reference_embeddings]
+        top_indices = np.argsort(similarities)[-top_k:][::-1]
+        return [(self.reference_set[i][0], self.reference_set[i][1], similarities[i]) for i in top_indices]
+    
+    def augment_image_embedding(self, input_batch, top_k=5):
+        input_embedding = self.model.encode_image(input_batch)
+        top_similar = self.retrieve_similar(input_batch, top_k)
+
+        # Encode the texts of the top K similar image-text pairs
+        texts = [text for _, text, _ in top_similar]
+        text_embeddings = self.encode_text(texts)
+
+        combined_embedding = torch.cat((input_embedding, text_embeddings), dim=0)
+        augmented_embedding = torch.mean(combined_embedding, dim=0)
+
+        return augmented_embedding
