@@ -59,13 +59,14 @@ class RaClipVanilla(BaseVLM):
         return text_features
     
     def retrieve_similar(self, image_batch, top_k=5):
-        input_embedding = self.model.encode_image(image_batch)
+        input_embedding = self.encode_image(image_batch)
         similarities = [torch.cosine_similarity(input_embedding, ref_emb, dim=1).item() for ref_emb in self.reference_embeddings]
         top_indices = np.argsort(similarities)[-top_k:][::-1]
         return [(self.reference_set[i][0], self.reference_set[i][1], similarities[i]) for i in top_indices]
     
-    def augment_image_embedding(self, input_batch, top_k=5):
-        input_embedding = self.model.encode_image(input_batch)
+    def augment_image_embedding(self, input_image_paths, top_k=5):
+        input_batch = [Image.open(image_path).convert("RGB") for image_path in input_image_paths]
+        input_embedding = self.encode_image(input_batch)
         top_similar = self.retrieve_similar(input_batch, top_k)
 
         # Encode the texts of the top K similar image-text pairs
@@ -80,4 +81,5 @@ class RaClipVanilla(BaseVLM):
 model = RaClipVanilla()
 image_path = "/Users/jalend/Downloads/CSE252D/IMPART/data/reference_set/" + "dog.jpg"
 image = Image.open(image_path).convert("RGB")
-print(model.encode_image([image]))
+# print(model.encode_image([image]))
+print(model.retrieve_similar([image]))
