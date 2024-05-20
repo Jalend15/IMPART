@@ -1,4 +1,8 @@
 from vlm.base_vlm import BaseVLM
+import torch
+import clip
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class RaClipVanilla(BaseVLM):
     # Should have all necessary components including clip, reference dataset, k etc..
@@ -15,4 +19,6 @@ class RaClipVanilla(BaseVLM):
 
     # same as clip 
     def encode_text(self, text_batch):
-        pass
+        text_inputs = torch.cat([clip.tokenize(text) for text in text_batch]).to(device)
+        text_features = self.model.encode_text(text_inputs)
+        return text_features
