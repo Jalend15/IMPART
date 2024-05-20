@@ -82,4 +82,5 @@ model = RaClipVanilla()
 image_path = "/Users/jalend/Downloads/CSE252D/IMPART/data/reference_set/" + "dog.jpg"
 image = Image.open(image_path).convert("RGB")
 # print(model.encode_image([image]))
-print(model.retrieve_similar([image]))
+# print(model.retrieve_similar([image]))
+print(model.augment_image_embedding([image_path],2))
