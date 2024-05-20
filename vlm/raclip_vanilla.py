@@ -1,16 +1,16 @@
-from vlm.base_vlm import BaseVLM
 import torch
 import os
 import clip
+from base_vlm import BaseVLM
 import csv
-import Image
+from PIL import Image
 import numpy as np
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class RaClipVanilla(BaseVLM):
     # Should have all necessary components including clip, reference dataset, k etc..
-    def __init__(self, name='RaClip Vanilla', model_name='ViT-B/32', dataset_path='path/to/dataset'):
+    def __init__(self, name='RaClip Vanilla', model_name='ViT-B/32', dataset_path='/Users/jalend/Downloads/CSE252D/IMPART/data/reference_set/reference_set.csv'):
         super().__init__(name)
         self.model, self.preprocess = clip.load(model_name, device)
         self.dataset_path = dataset_path
@@ -25,18 +25,20 @@ class RaClipVanilla(BaseVLM):
         """
         reference_set = []
         reference_embeddings = []
+        dir_path = "/Users/jalend/Downloads/CSE252D/IMPART/data/reference_set/"
         with open(self.dataset_path, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                image_path = row['image_path']
-                description = row['description']
+                image_path = dir_path + row['image_path']
+                description = dir_path + row['description']
                 image = Image.open(image_path).convert("RGB")
-                processed_image = self.preprocess(image).unsqueeze(0).to(self.device)
+                processed_image = self.preprocess(image).unsqueeze(0).to(device)
                 embedding = self.model.encode_image(processed_image)
                 reference_set.append((image_path, description))
                 reference_embeddings.append(embedding.squeeze(0))  # Store the embeddings for later retrieval
-
-        print(f"Loaded {len(self.reference_set)} image-text pairs into the reference set.")
+        
+        print(f"Loaded {len(reference_set)} image-text pairs into the reference set.")
+        print(reference_embeddings)
         return reference_set, reference_embeddings
 
 
@@ -70,3 +72,6 @@ class RaClipVanilla(BaseVLM):
         augmented_embedding = torch.mean(combined_embedding, dim=0)
 
         return augmented_embedding
+    
+model = RaClipVanilla()
+model.load_reference_set()
