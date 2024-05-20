@@ -38,13 +38,17 @@ class RaClipVanilla(BaseVLM):
                 reference_embeddings.append(embedding.squeeze(0))  # Store the embeddings for later retrieval
         
         print(f"Loaded {len(reference_set)} image-text pairs into the reference set.")
-        print(reference_embeddings)
         return reference_set, reference_embeddings
 
 
     # should implement retrieval from reference set and augmentation  
     def encode_image(self, image_batch):
-        image_inputs = torch.stack([self.preprocess(image).unsqueeze(0) for image in image_batch]).to(device)
+        image_inputs = torch.stack([self.preprocess(image).unsqueeze(0) for image in image_batch]).to(device).float()
+        print("Image inputs shape:", image_inputs.shape)  # Debug: Check the input shape
+        if image_inputs.dim() == 5:  # Checks if there's an extra batch dimension
+            image_inputs = image_inputs.squeeze(1)  # Remove the unnecessary dimension
+            print("Image inputs shape:", image_inputs.shape)
+
         image_features = self.model.encode_image(image_inputs)
         return image_features
 
@@ -74,4 +78,6 @@ class RaClipVanilla(BaseVLM):
         return augmented_embedding
     
 model = RaClipVanilla()
-model.load_reference_set()
+image_path = "/Users/jalend/Downloads/CSE252D/IMPART/data/reference_set/" + "dog.jpg"
+image = Image.open(image_path).convert("RGB")
+print(model.encode_image([image]))
