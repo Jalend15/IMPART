@@ -1,0 +1,1 @@
+# script to load reference set, embed using clip and store in vector db (may be chroma)

@@ -1,22 +1,21 @@
 from vlm.base_vlm import BaseVLM
+from raclip.model import Model
+import torch
+import clip
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class RaClip(BaseVLM):
-    # Should have all necessary components including clip, reference dataset, k, model parameters etc..
-    def __init__(self, name='RaClip'):
+    def __init__(self, retriever, model_checkpoint, name='RaClip'):
         super().__init__(name)
-
-    # Should load and create the reference set and train set
-    def load_dataset(self, dataset):
-        pass
-
-    # implement training loop
-    def train(self):
-        pass
-        
-    # should implement retrieval from reference set and augmentation  
+        # load from checkpoint
+        self.model = Model(retriever)
+  
     def encode_image(self, image_batch):
-        pass
+        image_features, _ = self.model(image_batch=image_batch)
+        return image_features
 
-    # same as clip 
     def encode_text(self, text_batch):
-        pass
+        text_inputs = torch.cat([clip.tokenize(text) for text in text_batch]).to(device)
+        text_features = self.model(text_batch=text_inputs)
+        return text_features
