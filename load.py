@@ -1,7 +1,7 @@
 # script to load reference set, embed using clip and store in vector db (may be chroma)
 import torch
 import os
-import vlm.clip as clip
+import clip
 import csv
 from PIL import Image
 import pickle
@@ -9,7 +9,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class Load():
     # Should have all necessary components including clip, reference dataset, k etc..
-    def __init__(self, model_name='ViT-B/32', dataset_path='/Users/jalend/Downloads/CSE252D/IMPART/data/reference_set/reference_set.csv'):
+    def __init__(self, model_name='ViT-B/32', dataset_path='./data/reference_set/reference_set.csv'):
         self.model, self.preprocess = clip.load(model_name, device)
         self.dataset_path = dataset_path
         self.reference_set, self.reference_embeddings = self.load_reference_set()
@@ -38,7 +38,7 @@ class Load():
         reference_set = []
         reference_embeddings = []
         torch.no_grad()
-        dir_path = "/Users/jalend/Downloads/CSE252D/IMPART/data/reference_set/"
+        dir_path = "./data/reference_set/"
         with open(self.dataset_path, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
@@ -59,7 +59,7 @@ class Load():
 
     def save_embeddings(self, embeddings):
         """Save embeddings to a pickle file."""
-        with open('/Users/jalend/Downloads/CSE252D/IMPART/data/reference_embeddings.pkl', 'wb') as f:
+        with open('./data/reference_embeddings.pkl', 'wb') as f:
             pickle.dump(embeddings, f)
         print("Embeddings have been saved to a pickle file.")
         
