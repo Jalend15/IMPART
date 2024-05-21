@@ -1,6 +1,6 @@
 import torch
-from raclip.model import Model
-from raclip.loss import InfoNCELoss
+from raclip_modules.model import Model
+from raclip_modules.loss import InfoNCELoss
 from raclip.retriever import Retriever
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
