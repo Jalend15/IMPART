@@ -26,15 +26,19 @@ class Retriever:
         return embeddings
 
     def retrieve_similar(self, image_embeddings, top_k=5):
-        similarities = [torch.cosine_similarity(image_embeddings, ref_emb['image_embedding'], dim=1).item() for ref_emb in self.reference_embeddings]
-        top_indices = np.argsort(similarities)[-top_k:][::-1]
+        image_embeddings /= image_embeddings.norm(dim=-1, keepdim=True)
+        self.image_embeddings /= self.image_embeddings.norm(dim=-1,keepdim=True)
+        similarities =torch.stack([torch.mm(image_embeddings, self.image_embeddings.transpose(0,1))])
+        top_indices = torch.argsort(similarities).squeeze(0)[:,-top_k:]
         top_embeddings = torch.stack([self.image_embeddings[i] for i in top_indices])
         top_text_embeddings = torch.stack([self.text_embeddings[i] for i in top_indices])
 
         return top_embeddings, top_text_embeddings
     
 # retriever = Retriever()
-# image_path = "./data/reference_set/" + "dog.jpg"
+# image_path = "./data/reference_set/" + "car.jpg"
 # image = Image.open(image_path).convert("RGB")
 # image_input = retriever.preprocess(image).unsqueeze(0)
-# print(retriever.retrieve_similar(retriever.model.encode_image(image_input)))
+# image_input_1 = retriever.preprocess(image).unsqueeze(0)
+
+# print(retriever.retrieve_similar(retriever.model.encode_image(torch.cat([image_input, image_input_1,image_input_1]))))
