@@ -12,6 +12,8 @@ class Retriever:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model, self.preprocess = clip.load(model_name, device=self.device)
         self.reference_embeddings = self.load_embeddings(embeddings_path)
+        self.image_embeddings = torch.stack([x['image_embedding'] for x in self.reference_embeddings])
+        self.text_embeddings = torch.stack([x['text_embedding'] for x in self.reference_embeddings])
         self.reference_set = []
         for x in self.reference_embeddings:
             self.reference_set.append([x['image_embedding'],x['text_embedding']])
@@ -42,6 +44,10 @@ class Retriever:
         input_embedding = self.encode_image(image_batch)
         similarities = [torch.cosine_similarity(input_embedding, ref_emb['image_embedding'], dim=1).item() for ref_emb in self.reference_embeddings]
         top_indices = np.argsort(similarities)[-top_k:][::-1]
+        top_embeddings = torch.stack([self.image_embeddings[i] for i in top_indices])
+        top_text_embeddings = torch.stack([self.text_embeddings[i] for i in top_indices])
+
+        return top_embeddings, top_text_embeddings
         return [(self.reference_set[i][0], self.reference_set[i][1], similarities[i]) for i in top_indices]
     
 retriever = Retriever()
