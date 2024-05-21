@@ -1,15 +1,8 @@
 import torch
-import os
-import clip
-import csv
-from PIL import Image
-import numpy as np
 import pickle
 
 class Retriever:
-    def __init__(self, model_name='ViT-B/32', embeddings_path='./data/reference_embeddings.pkl'):
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model, self.preprocess = clip.load(model_name, device=self.device)
+    def __init__(self, embeddings_path='./data/reference_embeddings.pkl'):
         self.ref_image_embeddings, self.ref_text_embeddings = self.load_embeddings(embeddings_path)
     
     def load_embeddings(self, embeddings_path):

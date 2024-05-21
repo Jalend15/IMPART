@@ -6,10 +6,9 @@ from raclip_modules.retriever import Retriever
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class RaClipVanilla(BaseVLM):
-    def __init__(self, name='RaClip Vanilla', model_name='ViT-B/32', dataset_path='./data/reference_set/reference_set.csv'):
+    def __init__(self, name='RaClip Vanilla', model_name='ViT-B/32'):
         super().__init__(name)
         self.model, self.preprocess = clip.load(model_name, device)
-        self.dataset_path = dataset_path
         self.retriever = Retriever()
  
     def encode_image(self, image_batch):
@@ -24,7 +23,6 @@ class RaClipVanilla(BaseVLM):
         return text_features
 
     def augment_image_embedding(self, input_embedding, top_image_embeddings, top_text_embeddings, weights = [1.0,0.5,0.5]):
-
         # Combine embeddings with weights
         weighted_input_embedding = weights[0] * input_embedding
         weighted_image_embeddings = weights[1] * top_image_embeddings
