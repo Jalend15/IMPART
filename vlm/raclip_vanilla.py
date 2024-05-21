@@ -52,7 +52,6 @@ class RaClipVanilla(BaseVLM):
         image_features = self.model.encode_image(image_inputs)
         return image_features
 
-    # same as clip 
     def encode_text(self, text_batch):
         text_inputs = torch.cat([clip.tokenize(text) for text in text_batch]).to(device)
         text_features = self.model.encode_text(text_inputs)
