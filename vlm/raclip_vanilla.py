@@ -1,5 +1,4 @@
 import torch
-import os
 import clip
 from base_vlm import BaseVLM
 import csv
@@ -10,7 +9,6 @@ import raclip_modules.retriever as retriever
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class RaClipVanilla(BaseVLM):
-    # Should have all necessary components including clip, reference dataset, k etc..
     def __init__(self, name='RaClip Vanilla', model_name='ViT-B/32', dataset_path='./data/reference_set/reference_set.csv'):
         super().__init__(name)
         self.model, self.preprocess = clip.load(model_name, device)

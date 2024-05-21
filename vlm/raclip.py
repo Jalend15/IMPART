@@ -15,6 +15,7 @@ class RaClip(BaseVLM):
         image_features, _ = self.model(image_batch=image_batch)
         return image_features
 
+    # same as clip_old
     def encode_text(self, text_batch):
         text_inputs = torch.cat([clip.tokenize(text) for text in text_batch]).to(device)
         text_features = self.model(text_batch=text_inputs)
