@@ -33,12 +33,20 @@ class RaClipVanilla(BaseVLM):
         text_features = self.model.encode_text(text_inputs)
         return text_features
 
-    def augment_image_embedding(self, input_image_paths, top_k=5):
+    def augment_image_embedding(self, input_image_paths, top_k=5, weights = [1.0,0.5,0.5]):
         input_batch = [Image.open(image_path).convert("RGB") for image_path in input_image_paths]
         input_embedding = self.encode_image(input_batch)
         top_image_embeddings, top_text_embeddings = self.retriever.retrieve_similar(image_batch=input_batch)
-        combined_embedding = torch.cat((input_embedding, top_image_embeddings), dim=0)
-        augmented_embedding = torch.mean(combined_embedding, dim=0)
+        # Combine embeddings with weights
+        weighted_input_embedding = weights[0] * input_embedding
+        weighted_image_embeddings = weights[1] * top_image_embeddings
+        weighted_text_embeddings = weights[2] * top_text_embeddings
+
+        # Concatenate all embeddings and compute the weighted average
+        combined_embedding = torch.cat((weighted_input_embedding, weighted_image_embeddings, weighted_text_embeddings), dim=0)
+        augmented_embedding = torch.sum(combined_embedding, dim=0) / sum(weights)
+        print(input_embedding.shape)
+        print(augmented_embedding.shape)
 
         return augmented_embedding
     
