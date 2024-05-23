@@ -3,30 +3,47 @@ import pickle
 
 class Retriever:
     def __init__(self, embeddings_path='./data/reference_embeddings.pkl'):
-        self.ref_image_embeddings, self.ref_text_embeddings = self.load_embeddings(embeddings_path)
+        self.ref_image_embeddings, self.ref_text_embeddings, self.meta_data = self.load_embeddings(embeddings_path)
     
     def load_embeddings(self, embeddings_path):
         """Load embeddings from a pickle file."""
         with open(embeddings_path, 'rb') as f:
             embeddings = pickle.load(f)
-        print("Embeddings have been loaded from a pickle file.")
+        print(f"{len(embeddings)} reference embeddings have been loaded from pickle file: {embeddings_path}")
         
         image_embeddings = torch.stack([x['image_embedding'] for x in embeddings])
         text_embeddings = torch.stack([x['text_embedding'] for x in embeddings])
+        meta_data = [x['meta_data'] for x in embeddings]
 
-        return image_embeddings, text_embeddings
+        return image_embeddings, text_embeddings, meta_data
 
     def retrieve_similar(self, image_embeddings, top_k):
         image_embeddings /= image_embeddings.norm(dim=-1, keepdim=True)
         self.ref_image_embeddings /= self.ref_image_embeddings.norm(dim=-1,keepdim=True)
 
         similarities = torch.mm(image_embeddings, self.ref_image_embeddings.transpose(0,1))
-        top_indices = torch.argsort(similarities)[:,-top_k:]
+        top_indices = torch.argsort(similarities, descending=True)[:,:top_k]
         
         top_image_embeddings = self.ref_image_embeddings[top_indices]
         top_text_embeddings = self.ref_text_embeddings[top_indices]
 
         return top_image_embeddings, top_text_embeddings
+
+    def retrieve_similar_for_image(self, image_embeddings, top_k):
+        image_embeddings /= image_embeddings.norm(dim=-1, keepdim=True)
+        self.ref_image_embeddings /= self.ref_image_embeddings.norm(dim=-1,keepdim=True)
+
+        similarities = torch.mm(image_embeddings, self.ref_image_embeddings.transpose(0,1))
+        top_indices = torch.argsort(similarities, descending=True)[:,:top_k]
+
+        top_indices = top_indices.squeeze(0)
+        print(top_indices.shape)
+        
+        top_meta_data = [self.meta_data[ind] for ind in top_indices]
+        top_image_embeddings = self.ref_image_embeddings[top_indices]
+        top_text_embeddings = self.ref_text_embeddings[top_indices]
+
+        return top_meta_data, top_image_embeddings, top_text_embeddings
     
 # retriever = Retriever()
 # image_path = "./data/reference_set/" + "car.jpg"
