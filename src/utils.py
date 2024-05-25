@@ -1,10 +1,16 @@
 from tabulate import tabulate
+import pandas as pd
 import pickle
 import os
+import clip
+import torch
 
-os.makedirs('.cache', exist_ok=True)
+os.makedirs('../.cache', exist_ok=True)
 
-def save_result(model, dataset, accuracy, file_name='.cache/result.pkl'):
+device = "cuda" if torch.cuda.is_available() else "cpu"
+_, clip_preprocess = clip.load('ViT-B/32', device)
+
+def save_result(model, dataset, accuracy, file_name='../.cache/result.pkl'):
     try:
         with open(file_name, 'rb') as f:
             result_dict = pickle.load(f)
@@ -36,10 +42,10 @@ def display_table(result_dict):
 
     print(tabulate(table_dict, headers="keys", tablefmt="fancy_grid"))
 
-def clear_results(file_name='.cache/result.pkl'):
+def clear_results(file_name='../.cache/result.pkl'):
     os.remove(file_name)
 
-def display_results(file_name='.cache/result.pkl'):
+def display_results(file_name='../.cache/result.pkl'):
     try:
         with open(file_name, 'rb') as f:
             result_dict = pickle.load(f)

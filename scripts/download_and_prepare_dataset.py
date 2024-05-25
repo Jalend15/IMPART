@@ -5,6 +5,12 @@ from bs4 import BeautifulSoup
 import urllib.parse
 from tqdm import tqdm
 
+YFCC_FILE = './resources/yfcc1k.csv'
+IMAGE_FOLDER = './data/images'
+TRAINSET_FILE = './data/train_set.csv'
+REFERENCE_SET_FILE = './data/reference_set.csv'
+SPLIT_RATIO = 0.1
+
 def clean_description(description_with_html):
     # Decode URL-encoded characters
     description_with_html = description_with_html.replace('+', ' ')
@@ -38,12 +44,8 @@ def download_image(url, path):
         print(f"An error occurred: {err}")
         return False
 
-
-YFCC_FILE = './data/yfcc1k.csv'
-IMAGE_FOLDER = './data/images'
-OUT_FILE = './data/reference_set_details.csv'
-
 df = pd.read_csv(YFCC_FILE)
+os.makedirs(IMAGE_FOLDER, exist_ok=True)
 
 image_data = []
 for index, row in tqdm(df.iterrows(), total=len(df)):
@@ -64,4 +66,13 @@ for index, row in tqdm(df.iterrows(), total=len(df)):
         )
 
 image_df = pd.DataFrame(image_data)
-image_df.to_csv(OUT_FILE, index=False)
+df_shuffled = image_df.sample(frac=1).reset_index(drop=True)
+
+split_index = int(SPLIT_RATIO * len(image_df))
+df_train = df_shuffled[split_index:]
+df_reference = df_shuffled[:split_index]
+
+df_train.to_csv(TRAINSET_FILE)
+print(f'Saved train set to {TRAINSET_FILE}')
+df_reference.to_csv(REFERENCE_SET_FILE)
+print(f'Saved reference set to {REFERENCE_SET_FILE}')

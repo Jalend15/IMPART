@@ -1,6 +1,6 @@
 import clip
 import torch
-from vlm.base_vlm import BaseVLM
+from src.vlm.base_vlm import BaseVLM
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 

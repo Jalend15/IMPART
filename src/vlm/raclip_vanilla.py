@@ -1,15 +1,18 @@
 import torch
 import clip
-from vlm.base_vlm import BaseVLM
-from raclip_modules.retriever import Retriever
+from src.vlm.base_vlm import BaseVLM
+from src.raclip_modules.retriever import Retriever
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class RaClipVanilla(BaseVLM):
-    def __init__(self, name='RaClip Vanilla', model_name='ViT-B/32'):
+    def __init__(self, 
+                 reference_embeddings_path = '../.cache/reference_embeddings.pkl',
+                 name='RaClip Vanilla', 
+                 model_name='ViT-B/32'):
         super().__init__(name)
         self.model, self.preprocess = clip.load(model_name, device)
-        self.retriever = Retriever()
+        self.retriever = Retriever(reference_embeddings_path)
  
     def encode_image(self, image_batch):
         image_embeddings = self.model.encode_image(image_batch)
@@ -22,7 +25,7 @@ class RaClipVanilla(BaseVLM):
         text_features = self.model.encode_text(text_inputs)
         return text_features
 
-    def augment_image_embedding(self, input_embedding, top_image_embeddings, top_text_embeddings, weights = [1.0,0.5,0]):
+    def augment_image_embedding(self, input_embedding, top_image_embeddings, top_text_embeddings, weights = [1,0.05,0.05]):
         # Combine embeddings with weights
         weighted_input_embedding = weights[0] * input_embedding
         weighted_image_embeddings = weights[1] * top_image_embeddings / top_image_embeddings.shape[1]
