@@ -12,3 +12,25 @@ conda install --yes -c pytorch pytorch torchvision cpuonly
 pip install -r requirements.txt
 pip install git+https://github.com/openai/CLIP.git
 ```
+
+**Scripts**
+
+Go to the root directory and add it to the python path
+```
+export PYTHONPATH=".:$PYTHONPATH" 
+```
+
+Run this to download yfcc dataset to local and split it into train and reference set
+```
+python scripts/download_and_prepare_dataset.py
+```
+
+Run this to load reference embeddings
+```
+python scripts/load_reference_set.py 
+```
+
+Run this to train the model
+```
+python scripts/train.py
+```
