@@ -1,8 +1,7 @@
 import clip
 import torch
 from src.vlm.base_vlm import BaseVLM
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
+from src.utils import device
 
 class Clip(BaseVLM):
     def __init__(self, name='Clip'):

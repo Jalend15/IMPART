@@ -1,8 +1,6 @@
 import torch
 import pickle
-
-# device = 'mps'
-device = "cuda" if torch.cuda.is_available() else "cpu"
+from src.utils import device
 
 class Retriever:
     def __init__(self, embeddings_path='../.cache/reference_embeddings.pkl'):
@@ -37,7 +35,6 @@ class Retriever:
     def retrieve_similar_for_image(self, image_embeddings, top_k):
         image_embeddings /= image_embeddings.norm(dim=-1, keepdim=True)
         self.ref_image_embeddings /= self.ref_image_embeddings.norm(dim=-1,keepdim=True)
-        self.ref_image_embeddings = self.ref_image_embeddings.to(device)
 
         similarities = torch.mm(image_embeddings, self.ref_image_embeddings.transpose(0,1))
         top_indices = torch.argsort(similarities, descending=True)[:,:top_k]

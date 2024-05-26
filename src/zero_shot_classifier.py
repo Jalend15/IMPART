@@ -2,8 +2,7 @@ import torch
 from tqdm import tqdm
 from src.vlm.base_vlm import BaseVLM
 from src import utils
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
+from src.utils import device
 
 class ZeroShotClassifier:
 

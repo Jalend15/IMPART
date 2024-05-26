@@ -7,7 +7,8 @@ import torch
 
 os.makedirs('../.cache', exist_ok=True)
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+# device = 'cpu'
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 _, clip_preprocess = clip.load('ViT-B/32', device)
 
 def save_result(model, dataset, accuracy, file_name='../.cache/result.pkl'):

@@ -2,6 +2,7 @@ import os
 import torch
 import time
 from torch.utils.data import DataLoader
+from src.utils import device
 from src.raclip_modules.model import Model
 from src.raclip_modules.retriever import Retriever
 from src.raclip_modules.loss import InfoNCELoss
@@ -12,9 +13,7 @@ MODEL_CHECKPOINT_FOLDER = './.cache/checkpoints'
 REFERENCE_EMBEDDINGS_FILE = './.cache/reference_embeddings.pkl'
 
 os.makedirs(MODEL_CHECKPOINT_FOLDER, exist_ok=True)
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-# device = 'mps'
+print(f'Device being used: {device}')
 
 dataset = CustomDataset(TRAIN_SET_FILE)
 train_loader = DataLoader(dataset, batch_size=32, shuffle=True)
@@ -27,8 +26,6 @@ optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters(
 for epoch in range(4):
     end = 0
     for batch in train_loader:
-        print(f'load time: {time.time() - end}')
-        start = time.time()
         image_batch = batch['image'].to(device)
         text_batch = batch['text'].to(device)
         
@@ -38,9 +35,6 @@ for epoch in range(4):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        print(f'loss = {loss}')
-        end = time.time()
-        print(f'train time: {end - start}')
     print(f'epoch {epoch + 1} over')
 
 model_file = os.path.join(MODEL_CHECKPOINT_FOLDER, 'model.pth')

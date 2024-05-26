@@ -1,10 +1,9 @@
 import torch
 import clip
+from src.utils import device
 from src.vlm.base_vlm import BaseVLM
 from src.raclip_modules.model import Model
 from src.raclip_modules.retriever import Retriever
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class RaClip(BaseVLM):
     def __init__(self, 

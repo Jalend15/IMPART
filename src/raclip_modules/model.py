@@ -1,10 +1,7 @@
 import torch
 import torch.nn as nn
 import clip
-from src.raclip_modules.retriever import Retriever
-
-# device = 'mps'
-device = "cuda" if torch.cuda.is_available() else "cpu"
+from src.utils import device
 
 class Model(nn.Module):
     def __init__(self, retriever, num_attention_layers=2):
@@ -20,7 +17,7 @@ class Model(nn.Module):
         
     def forward(self, image_batch=None, text_batch=None):
         if image_batch is not None:
-            image_embeddings = self.clip_model.encode_image(image_batch)
+            image_embeddings = self.clip_model.encode_image(image_batch).float()
 
             # (batch_size, k, embd_size), (batch_size, k, embd_size)
             rtvd_image_embeddings, rtvd_text_embeddings = self.retriever.retrieve_similar(image_embeddings, self.k)

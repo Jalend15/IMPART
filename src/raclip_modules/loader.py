@@ -4,8 +4,7 @@ from PIL import Image
 import pickle
 from tqdm import tqdm
 import pandas as pd
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
+from src.utils import device
 
 class Loader:
     def __init__(self, model_name='ViT-B/32'):
@@ -18,9 +17,7 @@ class Loader:
 
     def encode_text(self, text):
         try:
-            # just croping out first 40 words...still does not work for some cases 
-            crop_text = " ".join([t for t in text.split()[:40]])
-            text_input = clip.tokenize(crop_text).to(device)
+            text_input = clip.tokenize(text, truncate=True).to(device)
             text_features = self.model.encode_text(text_input)
             return text_features
         except Exception as e:
