@@ -1,9 +1,14 @@
 import torch
 import pickle
 
+# device = 'mps'
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 class Retriever:
     def __init__(self, embeddings_path='../.cache/reference_embeddings.pkl'):
         self.ref_image_embeddings, self.ref_text_embeddings, self.meta_data = self.load_embeddings(embeddings_path)
+        self.ref_image_embeddings = self.ref_image_embeddings.to(device)
+        self.ref_text_embeddings = self.ref_text_embeddings.to(device)
     
     def load_embeddings(self, embeddings_path):
         """Load embeddings from a pickle file."""
@@ -23,7 +28,7 @@ class Retriever:
 
         similarities = torch.mm(image_embeddings, self.ref_image_embeddings.transpose(0,1))
         top_indices = torch.argsort(similarities, descending=True)[:,:top_k]
-        
+
         top_image_embeddings = self.ref_image_embeddings[top_indices]
         top_text_embeddings = self.ref_text_embeddings[top_indices]
 
@@ -32,6 +37,7 @@ class Retriever:
     def retrieve_similar_for_image(self, image_embeddings, top_k):
         image_embeddings /= image_embeddings.norm(dim=-1, keepdim=True)
         self.ref_image_embeddings /= self.ref_image_embeddings.norm(dim=-1,keepdim=True)
+        self.ref_image_embeddings = self.ref_image_embeddings.to(device)
 
         similarities = torch.mm(image_embeddings, self.ref_image_embeddings.transpose(0,1))
         top_indices = torch.argsort(similarities, descending=True)[:,:top_k]

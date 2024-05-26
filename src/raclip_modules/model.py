@@ -3,14 +3,17 @@ import torch.nn as nn
 import clip
 from src.raclip_modules.retriever import Retriever
 
+# device = 'mps'
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 class Model(nn.Module):
     def __init__(self, retriever, num_attention_layers=2):
         super().__init__()
-        self.clip_model, _ = clip.load('ViT-B/32')
+        self.clip_model, _ = clip.load('ViT-B/32', device)
         self.retriever = retriever
         self.k = 8
-        self.crossattn_text_list = nn.ModuleList([nn.MultiheadAttention(512, 8, batch_first=True) for _ in range(num_attention_layers)])
-        self.crossattn_image_list = nn.ModuleList([nn.MultiheadAttention(512, 8, batch_first=True) for _ in range(num_attention_layers)])
+        self.crossattn_text_list = nn.ModuleList([nn.MultiheadAttention(512, 8, batch_first=True, device=device) for _ in range(num_attention_layers)])
+        self.crossattn_image_list = nn.ModuleList([nn.MultiheadAttention(512, 8, batch_first=True, device=device) for _ in range(num_attention_layers)])
 
         for param in self.clip_model.parameters():
             param.requires_grad = False
