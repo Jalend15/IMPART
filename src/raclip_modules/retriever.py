@@ -5,8 +5,8 @@ from src.utils import device
 class Retriever:
     def __init__(self, embeddings_path='../.cache/reference_embeddings.pkl'):
         self.ref_image_embeddings, self.ref_text_embeddings, self.meta_data = self.load_embeddings(embeddings_path)
-        self.ref_image_embeddings = self.ref_image_embeddings.to(device)
-        self.ref_text_embeddings = self.ref_text_embeddings.to(device)
+        self.ref_image_embeddings = self.ref_image_embeddings.to(device).float()
+        self.ref_text_embeddings = self.ref_text_embeddings.to(device).float()
     
     def load_embeddings(self, embeddings_path):
         """Load embeddings from a pickle file."""

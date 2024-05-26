@@ -21,7 +21,7 @@ class Model(nn.Module):
 
             # (batch_size, k, embd_size), (batch_size, k, embd_size)
             rtvd_image_embeddings, rtvd_text_embeddings = self.retriever.retrieve_similar(image_embeddings, self.k)
-            
+
             for i, (text_attention, image_attention) in enumerate(zip(self.crossattn_text_list, self.crossattn_image_list)):
                 if i > 0:
                     image_embeddings = torch.relu(image_embeddings)
