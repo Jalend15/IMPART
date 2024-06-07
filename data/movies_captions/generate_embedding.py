@@ -6,7 +6,7 @@ from PIL import Image
 
 output_dir = "2020_embeddings/"
 
-def extract_frames(video_path, fps=5):
+def extract_frames(video_path, file,fps=4):
     # Create output directory if it does not exist
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -17,18 +17,25 @@ def extract_frames(video_path, fps=5):
     print(video_fps)
     
     frame_count = 0
+    frame_no = 0
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
         
         # Save frames at the specified FPS
+
         if frame_count % (video_fps // fps) == 0:
-            frame_path = os.path.join(output_dir, f"frame_{frame_count}.jpg")
+            frame_no+=1
+            frame_path = os.path.join(output_dir, f"{file}_frame_{frame_no}.jpg")
             cv2.imwrite(frame_path, frame)
             print(f"Saved {frame_path}")
         
         frame_count += 1
+        
+    print(frame_count)
+    print(frame_no)
+    print(video_fps // fps)
 
     cap.release()
     
@@ -42,7 +49,9 @@ necessary_extension = '.mp4'
 for root, dirs, files in os.walk(directory_path):
     for file in files:
         print(directory_path+file)
-        extract_frames(directory_path+file)
+        extract_frames(directory_path+file,file)
+        break
+    break
 
 
 # # Load a pre-trained model (e.g., ResNet)
