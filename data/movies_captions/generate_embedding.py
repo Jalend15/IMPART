@@ -50,8 +50,6 @@ for root, dirs, files in os.walk(directory_path):
     for file in files:
         print(directory_path+file)
         extract_frames(directory_path+file,file)
-        break
-    break
 
 
 # # Load a pre-trained model (e.g., ResNet)
