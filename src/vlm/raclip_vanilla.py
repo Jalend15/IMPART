@@ -6,7 +6,7 @@ from src.raclip_modules.retriever import Retriever
 
 class RaClipVanilla(BaseVLM):
     def __init__(self, 
-                 reference_embeddings_path = '../.cache/reference_embeddings.pkl',
+                 reference_embeddings_path,
                  name='RaClip Vanilla', 
                  model_name='ViT-B/32'):
         super().__init__(name)
@@ -24,7 +24,7 @@ class RaClipVanilla(BaseVLM):
         text_features = self.model.encode_text(text_inputs)
         return text_features
 
-    def augment_image_embedding(self, input_embedding, top_image_embeddings, top_text_embeddings, weights = [1,0.05,0.05]):
+    def augment_image_embedding(self, input_embedding, top_image_embeddings, top_text_embeddings, weights = [1,0.5,0.05]):
         # Combine embeddings with weights
         weighted_input_embedding = weights[0] * input_embedding
         weighted_image_embeddings = weights[1] * top_image_embeddings / top_image_embeddings.shape[1]

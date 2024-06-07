@@ -7,13 +7,15 @@ from src.raclip_modules.retriever import Retriever
 
 class RaClip(BaseVLM):
     def __init__(self, 
-                 model_checkpoint='../.cache/checkpoints/model.pth',
-                 reference_embeddings_path = '../.cache/reference_embeddings.pkl',
+                 reference_embeddings_path,
+                 model_checkpoint=None,
                  name='RaClip'):
         super().__init__(name)
         self.retriever = Retriever(reference_embeddings_path)
         self.model = Model(self.retriever)
-        self.model.load_state_dict(torch.load(model_checkpoint))
+        if model_checkpoint is not None:
+            print(f'Loading model from {model_checkpoint}')
+            self.model.load_state_dict(torch.load(model_checkpoint))
   
     def encode_image(self, image_batch):
         image_features, _ = self.model(image_batch=image_batch)

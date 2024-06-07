@@ -7,10 +7,10 @@ class InfoNCELoss(nn.Module):
         self.temperature = temperature
     
     def forward(self, image_embeddings, text_embeddings):
-        image_embeddings = image_embeddings/image_embeddings.norm(dim=-1, keepdim=True)
-        text_embeddings = text_embeddings/text_embeddings.norm(dim=-1, keepdim=True)
+        image_embeddings_norm = image_embeddings/image_embeddings.norm(dim=-1, keepdim=True)
+        text_embeddings_norm = text_embeddings/text_embeddings.norm(dim=-1, keepdim=True)
 
-        similarities = (image_embeddings @ text_embeddings.T)/self.temperature
+        similarities = (image_embeddings_norm @ text_embeddings_norm.T)/self.temperature
 
         x = similarities.softmax(0)
         x = -torch.log(x)

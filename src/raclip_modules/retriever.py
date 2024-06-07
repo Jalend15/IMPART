@@ -3,7 +3,7 @@ import pickle
 from src.utils import device
 
 class Retriever:
-    def __init__(self, embeddings_path='../.cache/reference_embeddings.pkl'):
+    def __init__(self, embeddings_path):
         self.ref_image_embeddings, self.ref_text_embeddings, self.meta_data = self.load_embeddings(embeddings_path)
         self.ref_image_embeddings = self.ref_image_embeddings.to(device).float()
         self.ref_text_embeddings = self.ref_text_embeddings.to(device).float()
@@ -21,10 +21,10 @@ class Retriever:
         return image_embeddings, text_embeddings, meta_data
 
     def retrieve_similar(self, image_embeddings, top_k):
-        image_embeddings /= image_embeddings.norm(dim=-1, keepdim=True)
-        self.ref_image_embeddings /= self.ref_image_embeddings.norm(dim=-1,keepdim=True)
+        image_embeddings_norm = image_embeddings/image_embeddings.norm(dim=-1, keepdim=True)
+        ref_image_embeddings_norm = self.ref_image_embeddings/self.ref_image_embeddings.norm(dim=-1,keepdim=True)
 
-        similarities = torch.mm(image_embeddings, self.ref_image_embeddings.transpose(0,1))
+        similarities = torch.mm(image_embeddings_norm, ref_image_embeddings_norm.transpose(0,1))
         top_indices = torch.argsort(similarities, descending=True)[:,:top_k]
 
         top_image_embeddings = self.ref_image_embeddings[top_indices]
@@ -33,16 +33,16 @@ class Retriever:
         return top_image_embeddings, top_text_embeddings
 
     def retrieve_similar_for_image(self, image_embeddings, top_k):
-        image_embeddings /= image_embeddings.norm(dim=-1, keepdim=True)
-        self.ref_image_embeddings /= self.ref_image_embeddings.norm(dim=-1,keepdim=True)
+        image_embeddings_norm = image_embeddings/image_embeddings.norm(dim=-1, keepdim=True)
+        ref_image_embeddings_norm = self.ref_image_embeddings/self.ref_image_embeddings.norm(dim=-1,keepdim=True)
 
-        similarities = torch.mm(image_embeddings, self.ref_image_embeddings.transpose(0,1))
+        similarities = torch.mm(image_embeddings_norm, ref_image_embeddings_norm.transpose(0,1))
         top_indices = torch.argsort(similarities, descending=True)[:,:top_k]
 
         top_indices = top_indices.squeeze(0)
         
         top_meta_data = [self.meta_data[ind] for ind in top_indices]
-        top_image_embeddings = self.ref_image_embeddings[top_indices]
+        top_image_embeddings = ref_image_embeddings_norm[top_indices]
         top_text_embeddings = self.ref_text_embeddings[top_indices]
 
         return top_meta_data, top_image_embeddings, top_text_embeddings

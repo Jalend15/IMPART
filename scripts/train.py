@@ -8,24 +8,29 @@ from src.raclip_modules.retriever import Retriever
 from src.raclip_modules.loss import InfoNCELoss
 from src.custom_dataset import CustomDataset
 
-TRAIN_SET_FILE = './data/train_set.csv'
-MODEL_CHECKPOINT_FOLDER = './.cache/checkpoints'
-REFERENCE_EMBEDDINGS_FILE = './.cache/reference_embeddings.pkl'
+TRAIN_SET_FILE = './data/train_set_10k.csv'
+MODEL_CHECKPOINT_FOLDER = './.cache/checkpoints/10k'
+REFERENCE_EMBEDDINGS_FILE = './.cache/reference_embeddings_1k.pkl'
+BATCH_SIZE=100
 
 os.makedirs(MODEL_CHECKPOINT_FOLDER, exist_ok=True)
 print(f'Device being used: {device}')
 
 dataset = CustomDataset(TRAIN_SET_FILE)
-train_loader = DataLoader(dataset, batch_size=32, shuffle=True)
+train_loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 retriever = Retriever(REFERENCE_EMBEDDINGS_FILE)
 model = Model(retriever)
 criterion = InfoNCELoss()
 optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()))
 
-for epoch in range(4):
+model_file = os.path.join(MODEL_CHECKPOINT_FOLDER, f'model_0.pth')
+torch.save(model.state_dict(), model_file)
+print(f'Initial model saved to {model_file}')
+
+for epoch in range(8):
     end = 0
-    for batch in train_loader:
+    for i, batch in enumerate(train_loader):
         image_batch = batch['image'].to(device)
         text_batch = batch['text'].to(device)
         
@@ -35,8 +40,9 @@ for epoch in range(4):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        if i%10 == 9:
+            print(f'Images Seen: {(i+1)*BATCH_SIZE}, Loss: {loss}')
+    model_file = os.path.join(MODEL_CHECKPOINT_FOLDER, f'model_{epoch+1}.pth')
+    torch.save(model.state_dict(), model_file)
+    print(f'Model saved to {model_file}')
     print(f'epoch {epoch + 1} over')
-
-model_file = os.path.join(MODEL_CHECKPOINT_FOLDER, 'model.pth')
-torch.save(model.state_dict(), model_file)
-print(f'Model saved to {model_file}')

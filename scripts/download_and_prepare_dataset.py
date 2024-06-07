@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import urllib.parse
 from tqdm import tqdm
 
-YFCC_FILE = './resources/yfcc1k.csv'
+YFCC_FILE = './resources/yfcc10k.csv'
 IMAGE_FOLDER = './data/images'
 TRAINSET_FILE = './data/train_set.csv'
 REFERENCE_SET_FILE = './data/reference_set.csv'
