@@ -4,7 +4,7 @@ import torch
 from torchvision import models, transforms
 from PIL import Image
 
-output_dir = "2020_embeddings/"
+output_dir = "2019_embeddings/"
 
 def extract_frames(video_path, file,fps=4):
     # Create output directory if it does not exist
@@ -40,7 +40,7 @@ def extract_frames(video_path, file,fps=4):
     cap.release()
     
 # Define the directory to scan
-directory_path = '2020/'
+directory_path = '2019/'
 
 # Specify the file extension of files to delete
 necessary_extension = '.mp4'

@@ -1,7 +1,7 @@
 import os
 
 # Define the directory to scan
-directory_path = '2020/'
+directory_path = '2019/'
 
 # Specify the file extension of files to delete
 necessary_extension = '.mp4'
