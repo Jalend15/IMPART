@@ -6,7 +6,7 @@ from src.utils import device
 from src.raclip_modules.model import Model
 from src.raclip_modules.retriever import Retriever
 from src.raclip_modules.loss import InfoNCELoss
-from src.custom_dataset import CustomDataset
+from IMPART.src.raclip_modules.custom_dataset import CustomDataset
 
 TRAIN_SET_FILE = './data/train_set_10k.csv'
 MODEL_CHECKPOINT_FOLDER = './.cache/checkpoints/10k'
